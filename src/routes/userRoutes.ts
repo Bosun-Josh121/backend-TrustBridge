@@ -6,5 +6,6 @@ const router: Router = express.Router();
 
 // PUT /users/profile - Update user profile
 router.put('/profile', isAuthenticated, userController.updateProfile);
+router.get('/verify-change-email', userController.verifyChangeEmail);
 
 export default router;

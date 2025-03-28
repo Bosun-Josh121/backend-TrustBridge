@@ -29,10 +29,9 @@ class UserService {
     if (data.name !== undefined) updateData.name = data.name;
     if (data.monthlyIncome !== undefined) updateData.monthlyIncome = data.monthlyIncome;
     
-    // If email is changing, set verification to false
-    if (isEmailChanged) {
-      updateData.email = data.email;
-      updateData.emailVerified = false;
+        // Send verification email if new email is provided
+    if (data.email && isEmailChanged) {
+      await this.sendEmailVerification(userId, data.email, updateData.name);
     }
 
     // Update the user
@@ -40,11 +39,6 @@ class UserService {
       where: { id: userId },
       data: updateData,
     });
-
-    // Send verification email if email has changed
-    if (isEmailChanged && data.email) {
-      await this.sendEmailVerification(data.email, updatedUser.name);
-    }
 
     // Return the updated user (excluding sensitive information)
     return {
@@ -58,15 +52,29 @@ class UserService {
     };
   }
 
-  private async sendEmailVerification(email: string, userName: string) {
-    // Generate a verification token (in a real app, you'd save this with an expiry)
+  private async sendEmailVerification(
+    userId: string,
+    email: string,
+    userName: string
+  ) {
     const verificationToken = Math.random().toString(36).substring(2, 15);
-    
-    // In a real application, you would save this token and its expiry in the database
-    // For simplicity, we're just sending the email here
+    const emailVerification = await prisma.emailVerification.upsert({
+      where: { userId },
+      create: {
+        token: verificationToken,
+        newEmail: email,
+        userId,
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
+      },
+      update: {
+        token: verificationToken,
+        newEmail: email,
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
+      }
+    });
     
     const verificationMessage = `Please verify your new email address by clicking on this link: 
-    ${process.env.APP_URL || 'http://localhost:3000'}/verify-email?token=${verificationToken}`;
+    ${process.env.APP_URL || 'http://localhost:3000'}/verify-change-email?token=${verificationToken}`;
     
     await emailService.sendEmail(
       email,
@@ -74,6 +82,34 @@ class UserService {
       NotificationType.SYSTEM_ALERT,
       verificationMessage
     );
+  }
+
+  async verifyEmailChange(token: string) {
+    const emailVerification = await prisma.emailVerification.findFirst({
+      where: { token },
+      include: { user: true }
+    });
+    if (!emailVerification) {
+      const error: any = new Error('Invalid or expired token');
+      error.code = 'INVALID_TOKEN';
+      throw error;
+    }
+
+    const result = await prisma.user.update({
+      where: {
+        id: emailVerification.user.id
+      },
+      data: {
+        email: emailVerification.newEmail
+      }
+    });
+    await prisma.emailVerification.delete({
+      where: {
+        id: emailVerification.id
+      }
+    });
+
+    return result;
   }
 }
 
