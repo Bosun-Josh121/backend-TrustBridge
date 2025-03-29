@@ -1,15 +1,11 @@
+import { UpdateUserProfileResponse } from '../models/user';
 import prisma from '../config/prisma';
 import emailService from '../services/emailService';
 import { NotificationType } from '@prisma/client';
-
-interface UpdateProfileData {
-  name?: string;
-  email?: string;
-  monthlyIncome?: number;
-}
+import { UpdateUserProfileDto } from '../models/user';
 
 class UserService {
-  async updateUserProfile(userId: string, data: UpdateProfileData) {
+  async updateUserProfile(userId: string, data: UpdateUserProfileDto): Promise<UpdateUserProfileResponse>{
     // Get the current user data
     const currentUser = await prisma.user.findUnique({
       where: { id: userId }
@@ -28,8 +24,8 @@ class UserService {
     const updateData: any = {};
     if (data.name !== undefined) updateData.name = data.name;
     if (data.monthlyIncome !== undefined) updateData.monthlyIncome = data.monthlyIncome;
-    
-        // Send verification email if new email is provided
+
+    // Send verification email if new email is provided
     if (data.email && isEmailChanged) {
       await this.sendEmailVerification(userId, data.email, updateData.name);
     }
@@ -53,9 +49,9 @@ class UserService {
   }
 
   private async sendEmailVerification(
-    userId: string,
-    email: string,
-    userName: string
+      userId: string,
+      email: string,
+      userName: string
   ) {
     const verificationToken = Math.random().toString(36).substring(2, 15);
     const emailVerification = await prisma.emailVerification.upsert({
@@ -72,15 +68,15 @@ class UserService {
         expiresAt: new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
       }
     });
-    
+
     const verificationMessage = `Please verify your new email address by clicking on this link: 
-    ${process.env.APP_URL || 'http://localhost:3000'}/verify-change-email?token=${verificationToken}`;
-    
+    ${process.env.APP_URL || 'http://localhost:3000'}/users/verify-change-email?token=${verificationToken}`;
+
     await emailService.sendEmail(
-      email,
-      userName,
-      NotificationType.SYSTEM_ALERT,
-      verificationMessage
+        email,
+        userName,
+        NotificationType.SYSTEM_ALERT,
+        verificationMessage
     );
   }
 
@@ -89,7 +85,8 @@ class UserService {
       where: { token },
       include: { user: true }
     });
-    if (!emailVerification) {
+
+    if (!emailVerification || new Date() >= emailVerification.expiresAt ) {
       const error: any = new Error('Invalid or expired token');
       error.code = 'INVALID_TOKEN';
       throw error;

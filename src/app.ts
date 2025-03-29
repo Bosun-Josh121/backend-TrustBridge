@@ -58,7 +58,7 @@ app.use("/api", auditRoutes, creditScoreRoutes);
 app.use('/api/audit', isAuthenticated, isLender, auditRoutes); // Protect audit routes
 app.use('/api/analytics', isAuthenticated, analyticsRoutes); // Protect analytics routes
 app.use('/api/notifications', isAuthenticated, notificationRoutes); // Notification Routes
-app.use('/users', isAuthenticated, userRoutes); // User Routes
+app.use('/api/users', isAuthenticated, userRoutes); // User Routes
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

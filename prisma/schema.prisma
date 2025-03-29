@@ -26,6 +26,7 @@ model User {
   id         String   @id @default(uuid())
   name       String
   email      String   @unique
+  creditScore CreditScore?
   monthlyIncome Float?
   emailVerified Boolean @default(false)
   createdAt  DateTime @default(now())
@@ -136,5 +137,14 @@ model Notification {
   message     String
   isRead      Boolean  @default(false)
   createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+
+model CreditScore {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  score       Int
+  lastUpdated DateTime
   user        User     @relation(fields: [userId], references: [id])
 }

@@ -9,10 +9,6 @@ const updateProfileSchema = z.object({
   monthlyIncome: z.number().nonnegative().optional(),
 });
 
-const verifyChangeEmailSchema = z.object({
-  token: z.string()
-});
-
 export const updateProfile = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Get the authenticated user's ID
@@ -65,17 +61,18 @@ export const verifyChangeEmail = async (
   next: NextFunction
 ) => {
   try {
-    const validationResult = verifyChangeEmailSchema.safeParse(req.body);
-    if (!validationResult.success) {
-      res.status(400).json({ 
-        error: 'Invalid request data', 
-        details: validationResult.error.issues 
-      });
+    // Get token from query parameters instead of body
+    const token = req.query.token as string;
+    
+    if (!token) {
+      res.status(400).json({ error: 'Token is required' });
       return;
     }
-    const { token } = validationResult.data;
 
     await userService.verifyEmailChange(token);
+    
+    // Redirect to a success page or return a more user-friendly response
+    // You can customize this based on your frontend implementation
     res.json({ message: 'Email updated successfully' });
 
   } catch (error: any) {
@@ -83,8 +80,7 @@ export const verifyChangeEmail = async (
     if (error.code === 'INVALID_TOKEN') {
       res.status(400).json({ error: error.message });
     } else {
-      throw error;
+      next(error);
     }
-    next(error);
   }
-}
+};

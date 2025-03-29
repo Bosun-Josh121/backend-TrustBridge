@@ -48,3 +48,20 @@ export const updateUserNonce = async (user: User): Promise<string> => {
 export const updateLastLogin = (user: User): void => {
   user.lastLogin = new Date();
 };
+
+export interface UpdateUserProfileDto {
+  name?: string;
+  email?: string;
+  monthlyIncome?: number;
+}
+
+export interface UpdateUserProfileResponse {
+  message: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    monthlyIncome: number | null;
+    emailVerified: boolean;
+  }
+}
