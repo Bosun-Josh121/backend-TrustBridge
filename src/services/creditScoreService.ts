@@ -1,6 +1,7 @@
 import { Loan, Payment } from "@prisma/client";
 import prisma from "../config/prisma";
 
+
 class CreditScoreService {
   async calculateCreditScore(userId: string): Promise<number> {
     const user = await prisma.user.findUnique({

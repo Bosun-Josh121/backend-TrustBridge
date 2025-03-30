@@ -1,10 +1,12 @@
 import prisma from '../config/prisma';
 
-export async function createUser(name: string, email: string) {
+export async function createUser(name: string, email: string, password: string, walletAddress: string, nonce: string) {
     const user = await prisma.user.create({
       data: {
         name,
         email,
+        password,
+        walletAddress, nonce,
         reputation: { create: { reputationScore: 50, trend: "neutral" } }, // Default reputation
         creditScore: { create: { score: 600 } }, // Default credit score
       },

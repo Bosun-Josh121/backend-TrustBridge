@@ -38,12 +38,13 @@ class UserService {
 
     // Return the updated user (excluding sensitive information)
     return {
+      message: 'User profile updated successfully',
       user: {
         id: updatedUser.id,
         name: updatedUser.name,
         email: updatedUser.email,
         monthlyIncome: updatedUser.monthlyIncome,
-        emailVerified: updatedUser.emailVerified
+        isEmailVerified: updatedUser.isEmailVerified
       }
     };
   }

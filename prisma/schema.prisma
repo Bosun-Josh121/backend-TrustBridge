@@ -14,57 +14,73 @@ datasource db {
 }
 
 model Role {
-  id         String   @id @default(uuid())
-  name       String   @unique
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  users      RoleUser[]
+  id          String           @id @default(uuid())
+  name        String           @unique
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  users       RoleUser[]
   permissions RolePermission[]
 }
 
+model CreditScore {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  score       Int
+  lastUpdated DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+}
+
 model User {
-  id         String   @id @default(uuid())
-  name       String
-  email      String   @unique
-  creditScore CreditScore?
-  monthlyIncome Float?
-  emailVerified Boolean @default(false)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  roles      RoleUser[]
-  loans      Loan[]
-  payments   Payment[]
-  reputation Reputation?
-  recommendations Recommendation[]
-  emailVerification   EmailVerification?
-  auditLogs   AuditLog[]  
-  notifications Notification[] 
+  id                String             @id @default(uuid())
+  name              String
+  email             String             @unique
+  password          String
+  roles             RoleUser[]
+  loans             Loan[]
+  payments          Payment[]
+  reputation        Reputation?
+  recommendations   Recommendation[]
+  auditLogs         AuditLog[]
+  notifications     Notification[]
+  emailVerification EmailVerification?
+  resetToken        String?
+  walletAddress     String             @unique
+  nonce             String
+  createdAt         DateTime           @default(now())
+  lastLogin         DateTime?
+  refreshToken      RefreshToken[]
+  updatedAt         DateTime           @updatedAt
+  creditScore       CreditScore?
+  isEmailVerified   Boolean            @default(false)
+  otpCodes          OtpCode[]          @relation("UserOtpCodes")
+  monthlyIncome      Decimal?
 }
 
 model EmailVerification {
-  id          String      @id @default(uuid())
-  newEmail    String
-  token       String
-  expiresAt   DateTime
-  user        User        @relation(fields: [userId], references: [id])
-  userId      String      @unique
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id        String   @id @default(uuid())
+  newEmail  String
+  token     String
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model RoleUser {
   userId String
   roleId String
-  user   User @relation(fields: [userId], references: [id])
-  role   Role @relation(fields: [roleId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
   @@id([userId, roleId])
 }
 
 model Permission {
-  id         String   @id @default(uuid())
-  name       String   @unique
-  createdAt  DateTime @default(now())
-  roles      RolePermission[]
+  id        String           @id @default(uuid())
+  name      String           @unique
+  createdAt DateTime         @default(now())
+  roles     RolePermission[]
 }
 
 model RolePermission {
@@ -72,29 +88,30 @@ model RolePermission {
   permissionId String
   role         Role       @relation(fields: [roleId], references: [id])
   permission   Permission @relation(fields: [permissionId], references: [id])
+
   @@id([roleId, permissionId])
 }
 
 model Loan {
-  id           String   @id @default(uuid())
-  userId       String
-  amount       Decimal
-  status       String
-  createdAt    DateTime @default(now())
-  completedAt  DateTime?
-  user         User     @relation(fields: [userId], references: [id])
-  payments     Payment[]
+  id          String    @id @default(uuid())
+  userId      String
+  amount      Decimal
+  status      String
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+  user        User      @relation(fields: [userId], references: [id])
+  payments    Payment[]
 }
 
 model Payment {
-  id           String   @id @default(uuid())
-  userId       String
-  loanId       String
-  amount       Decimal
-  paymentDate  DateTime @default(now())
-  status       String
-  user         User     @relation(fields: [userId], references: [id])
-  loan         Loan     @relation(fields: [loanId], references: [id])
+  id          String   @id @default(uuid())
+  userId      String
+  loanId      String
+  amount      Decimal
+  paymentDate DateTime @default(now())
+  status      String
+  user        User     @relation(fields: [userId], references: [id])
+  loan        Loan     @relation(fields: [loanId], references: [id])
 }
 
 model Reputation {
@@ -107,10 +124,10 @@ model Reputation {
 }
 
 model Recommendation {
-  id                 String   @id @default(uuid())
+  id                 String @id @default(uuid())
   userId             String
   recommendationText String
-  user               User     @relation(fields: [userId], references: [id])
+  user               User   @relation(fields: [userId], references: [id])
 }
 
 model AuditLog {
@@ -131,20 +148,48 @@ enum NotificationType {
 }
 
 model Notification {
-  id          String   @id @default(uuid())
-  userId      String
+  id        String           @id @default(uuid())
+  userId    String
   type      NotificationType
-  message     String
-  isRead      Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  user        User     @relation(fields: [userId], references: [id])
+  message   String
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id])
 }
 
+model RefreshToken {
+  id              String    @id @default(uuid())
+  token           String    @unique
+  userId          String
+  type            TokenType
+  user            User      @relation(fields: [userId], references: [id])
+  expiresAt       DateTime
+  createdAt       DateTime  @default(now())
+  isRevoked       Boolean   @default(false)
+  family          String?
+  replacedByToken String?
+  device          String?
+  deviceId        String?
+  userAgent       String?
+  ipAddress       String?
+}
 
-model CreditScore {
-  id          String   @id @default(uuid())
-  userId      String   @unique
-  score       Int
-  lastUpdated DateTime
-  user        User     @relation(fields: [userId], references: [id])
+model OtpCode {
+  id        String   @id @default(uuid())
+  user      User     @relation("UserOtpCodes", fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+enum TokenType {
+  ACCESS
+  REFRESH
+}
+
+model RevokedToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  createdAt DateTime @default(now())
 }

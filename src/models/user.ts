@@ -1,9 +1,36 @@
+import { Decimal } from "@prisma/client/runtime/library";
+
 export interface User {
   walletAddress: string;
   nonce: string; // Used for signature verification
   createdAt: Date;
   lastLogin?: Date;
 }
+
+
+export interface Context {
+  user?: {
+    id: string;
+    email: string;
+  }
+}
+
+export interface CreateUserInput {
+  name: string;
+  email: string;
+  password: string;
+  walletAddress: string;
+  roleIds: string[];
+}
+
+export interface UpdateUserInput {
+  name?: string;
+  email?: string;
+  walletAddress?: string;
+}
+
+
+
 
 export interface UserSession {
   walletAddress: string;
@@ -61,7 +88,9 @@ export interface UpdateUserProfileResponse {
     id: string;
     name: string;
     email: string;
-    monthlyIncome: number | null;
-    emailVerified: boolean;
+    // add a field to store the monthly income
+
+    monthlyIncome:  Decimal| null;
+    isEmailVerified: boolean;
   }
 }
