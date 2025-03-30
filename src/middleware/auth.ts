@@ -38,7 +38,7 @@ export const isAuthenticated = async (
     }
 
     const payload = verifyAccessToken(token);
-    
+
     // Check if the token is revoked
     const isRevoked = await isTokenRevoked(token);
     if (isRevoked) {
@@ -187,8 +187,8 @@ export const forgotPassword = async (req: Request, res: Response) => {
     // Store the token in the DB (optional but good for reference)
     await prisma.user.update({
       where: { email },
-      data: { 
-        resetToken: token 
+      data: {
+        resetToken: token
 
       },
     });

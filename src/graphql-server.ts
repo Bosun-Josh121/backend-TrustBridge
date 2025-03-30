@@ -45,9 +45,13 @@
 //         schema: schemaWithResolvers,
 //         context: generateContext, // Use a more robust context generation
 //         formatError: (err) => {
-//             // Customize error format if needed
-//             console.error(err);
-//             return err;
+//             // Return only necessary error message
+//             return {
+//                 message: err.message,
+//                 extensions: {
+//                     code: err.extensions?.code || "INTERNAL_SERVER_ERROR"
+//                 }
+//             };
 //         },
 //         introspection: true, // Enable for development/testing
 //     });

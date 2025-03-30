@@ -1,8 +1,7 @@
 import { Request, Response } from 'express';
 import prisma from '../../src/config/prisma';
-const tokenUtils = require('../utils/tokenUtils');
-const emailService = require('../services/emailService');
-const bcrypt = require('bcrypt');
+import bcrypt from "bcryptjs";
+import emailService from "../services/emailService";
 
 // Create an endpoint to send a verification email
 const sendVerificationEmail = async (req: Request, res: Response) => {
@@ -10,7 +9,8 @@ const sendVerificationEmail = async (req: Request, res: Response) => {
     const { email } = req.body;
 
     if (!email) {
-      return res.status(400).json({ message: 'Email is required' });
+      res.status(400).json({ message: 'Email is required' });
+      return;
     }
 
     // Find the user by email
@@ -19,12 +19,14 @@ const sendVerificationEmail = async (req: Request, res: Response) => {
     });
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      res.status(404).json({ message: 'User not found' });
+      return;
     }
 
     // Check if user is already verified
     if (user.isEmailVerified) {
-      return res.status(400).json({ message: 'Email is already verified' });
+      res.status(400).json({ message: 'Email is already verified' });
+      return;
     }
 
     // Delete any existing verification tokens
@@ -36,16 +38,18 @@ const sendVerificationEmail = async (req: Request, res: Response) => {
     });
 
     // Generate a new verification token
-    const token = await tokenUtils.generateVerificationToken(user.id);
+    const token = await generateVerificationToken(user.id);
 
     // Send verification email
-    await emailService.sendVerificationEmail(email, token);
+    await sendVerificationEmail(email, token);
 
-    return res.status(200).json({ message: 'Verification email sent successfully' });
+   res.status(200).json({ message: 'Verification email sent successfully' });
+   return ;
   } catch (error) {
     const err = error as Error; // Type assertion
     console.error('Error sending verification email:', err);
-    return res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: 'Internal server error' });
+    return ;
   }
 };
 
@@ -55,11 +59,12 @@ const verifyEmail = async (req: Request, res: Response) => {
     const { token } = req.body;
 
     if (!token) {
-      return res.status(400).json({ message: 'Token is required' });
+      res.status(400).json({ message: 'Token is required' });
+      return;
     }
 
     // Verify the token
-    const userId = await tokenUtils.verifyToken(token);
+    const userId = await verifyToken(token);
 
     // Update user's email verification status
     const user = await prisma.user.update({
@@ -68,7 +73,8 @@ const verifyEmail = async (req: Request, res: Response) => {
     });
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      res.status(404).json({ message: 'User not found' });
+      return ;
     }
 
     // Delete the used token
@@ -80,16 +86,20 @@ const verifyEmail = async (req: Request, res: Response) => {
       },
     });
 
-    return res.status(200).json({ message: 'Email verified successfully' });
+
+    res.status(200).json({ message: 'Email verified successfully' });
+    return ;
   } catch (error) {
     const err = error as Error; // Type assertion
     console.error('Error verifying email:', err);
 
     if (err.message === 'Invalid or expired token' || err.message === 'Token has expired') {
-      return res.status(400).json({ message: err.message });
-    }
 
-    return res.status(500).json({ message: 'Internal server error' });
+      res.status(400).json({ message: err.message });
+      return;
+    }
+    res.status(500).json({ message: 'Internal server error' });
+    return;
   }
 };
 
@@ -104,7 +114,9 @@ const register = async (req: Request, res: Response) => {
     });
 
     if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
+
+      res.status(400).json({ message: 'User already exists' });
+      return;
     }
 
     // Hash the password
@@ -123,17 +135,19 @@ const register = async (req: Request, res: Response) => {
     });
 
     // Generate and send verification email
-    const token = await tokenUtils.generateVerificationToken(user.id);
-    await emailService.sendVerificationEmail(email, token);
+    const token = await generateVerificationToken(user.id);
+    await sendVerificationEmail(email, token);
 
-    return res.status(201).json({
+    res.status(201).json({
       message: 'User registered successfully. Please check your email to verify your account.',
       userId: user.id,
     });
+    return ;
   } catch (error) {
     const err = error as Error; // Type assertion
     console.error('Error registering user:', err);
-    return res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: 'Internal server error' });
+    return;
   }
 
 

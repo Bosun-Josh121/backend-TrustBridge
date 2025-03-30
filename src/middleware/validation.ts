@@ -1,4 +1,4 @@
-import { NextFunction } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { body, param, validationResult } from 'express-validator';
 
 // Validation for the register route
@@ -22,10 +22,11 @@ const validateVerifyEmail = [
 ];
 
 // Middleware to check for validation errors
-const checkValidationResult = (req: Request, res: Response, next: NextFunction) => {
+const checkValidationResult = (req: Request, res: Response, next: NextFunction): void => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status
+    res.status(400).json({ errors: errors.array() });
+    return;
   }
   next();
 };

@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction, Router } from 'express';
 import passport from 'passport';
 import { isAuthenticated, authenticateUser,forgotPassword, resetPassword } from '../middleware/auth';
 import expressAsyncHandler from 'express-async-handler';
+import * as userController from '../controllers/userController';
 import {
   findUserByWalletAddress,
   createUser,
@@ -177,6 +178,9 @@ router.post("/reset-password", expressAsyncHandler(resetPassword));
 router.post("/send-verification-email", expressAsyncHandler(sendVerificationEmail));
 router.post("/verify-email", validateVerifyEmail, checkValidationResult, expressAsyncHandler(verifyEmail));
 router.post("/register", validateRegister, checkValidationResult, expressAsyncHandler(register));
+router.put('/profile', userController.updateProfile);
+router.get('/verify-change-email', userController.verifyChangeEmail);
+
 
 router.use(errorHandler);
 

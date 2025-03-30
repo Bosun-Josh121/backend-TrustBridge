@@ -1,3 +1,5 @@
+import { Decimal } from "@prisma/client/runtime/library";
+
 export interface User {
   walletAddress: string;
   nonce: string; // Used for signature verification
@@ -73,3 +75,22 @@ export const updateUserNonce = async (user: User): Promise<string> => {
 export const updateLastLogin = (user: User): void => {
   user.lastLogin = new Date();
 };
+
+export interface UpdateUserProfileDto {
+  name?: string;
+  email?: string;
+  monthlyIncome?: number;
+}
+
+export interface UpdateUserProfileResponse {
+  message: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    // add a field to store the monthly income
+
+    monthlyIncome:  Decimal| null;
+    isEmailVerified: boolean;
+  }
+}

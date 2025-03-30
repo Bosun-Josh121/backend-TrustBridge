@@ -9,7 +9,7 @@ import authRoutes from './routes/authRoutes';
 import analyticsRoutes from './routes/analyticsRoutes';
 import blockchainService from './services/blockchainService';
 import notificationRoutes from './routes/notificationRoutes';
-import { isAuthenticated, isLender } from './middleware/auth'; 
+import { isAuthenticated, isLender } from './middleware/auth';
 import cookieParser from "cookie-parser";
 import { scheduleTokenCleanup } from './services/tokenCleanup';
 import errorHandler from './middleware/errorHandler'; // Import the error handler
@@ -63,7 +63,6 @@ app.use("/api/credit-score", isAuthenticated, creditScoreRoutes);
 app.use("/api/audit", isAuthenticated, isLender, auditRoutes);
 app.use("/api/analytics", isAuthenticated, analyticsRoutes);
 app.use("/api/notifications", isAuthenticated, notificationRoutes);
-
 
 // Start Token Cleanup Service (Runs Every Minute)
 // ScheduleModule.forRoot();
