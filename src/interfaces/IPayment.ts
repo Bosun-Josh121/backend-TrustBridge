@@ -1,4 +1,4 @@
-
+// IPayment.ts
 import { Decimal } from "@prisma/client/runtime/library";
 
 export interface IPayment {

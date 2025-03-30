@@ -1,4 +1,4 @@
-
+// ILoan.ts
 import { Decimal } from "@prisma/client/runtime/library";
 import { IPayment } from "./IPayment";
 

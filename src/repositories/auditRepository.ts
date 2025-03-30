@@ -1,21 +1,22 @@
 import prisma from '../config/prisma';
+import { IAudit } from '../interfaces/IAudit';
 
 /**
- * Repository for interacting with the audit log data.
- * This class contains methods for creating, retrieving, updating, and deleting audit logs in the database.
+ * Repositorio para interactuar con los datos de registro de auditoría.
+ * Esta clase contiene métodos para crear, recuperar, actualizar y eliminar registros de auditoría en la base de datos.
  */
 class AuditLogRepository {
 
   /**
-   * Creates a new audit log entry.
+   * Crea un nuevo registro de auditoría.
    *
-   * @param {string} userId - The ID of the user associated with the audit log.
-   * @param {string} action - The action performed that is being logged.
-   * @param {string} [details] - Optional details about the action performed.
+   * @param {string} userId - El ID del usuario asociado con el registro de auditoría.
+   * @param {string} action - La acción realizada que se está registrando.
+   * @param {string} [details] - Detalles opcionales sobre la acción realizada.
    * 
-   * @returns {Promise<any>} The newly created audit log.
+   * @returns {Promise<IAudit>} El registro de auditoría recién creado.
    */
-  async createAuditLog(userId: string, action: string, details?: string) {
+  async createAuditLog(userId: string, action: string, details?: string): Promise<IAudit> {
     return prisma.auditLog.create({
       data: {
         userId,
@@ -26,17 +27,17 @@ class AuditLogRepository {
   }
 
   /**
-   * Retrieves a list of audit logs with pagination and an optional filter for a specific user.
+   * Recupera una lista de registros de auditoría con paginación y un filtro opcional para un usuario específico.
    *
-   * @param {number} [page=1] - The page number for pagination. Default is 1.
-   * @param {number} [limit=10] - The number of records to retrieve per page. Default is 10.
-   * @param {string} [userId] - The optional user ID to filter audit logs by a specific user.
+   * @param {number} [page=1] - El número de página para la paginación. Por defecto es 1.
+   * @param {number} [limit=10] - El número de registros a recuperar por página. Por defecto es 10.
+   * @param {string} [userId] - El ID de usuario opcional para filtrar los registros de auditoría por un usuario específico.
    * 
-   * @returns {Promise<any[]>} A list of audit logs, potentially filtered by `userId` and paginated.
+   * @returns {Promise<IAudit[]>} Una lista de registros de auditoría, potencialmente filtrados por `userId` y paginados.
    */
-  async getAuditLogs(page: number = 1, limit: number = 10, userId?: string) {
-    const validatedPage = Math.max(1, Math.floor(page)); // minimum 1
-    const validatedLimit = Math.max(1, Math.floor(limit)); // minimum 1
+  async getAuditLogs(page: number = 1, limit: number = 10, userId?: string): Promise<IAudit[]> {
+    const validatedPage = Math.max(1, Math.floor(page)); // mínimo 1
+    const validatedLimit = Math.max(1, Math.floor(limit)); // mínimo 1
 
     const skip = (validatedPage - 1) * validatedLimit;
 
@@ -53,28 +54,28 @@ class AuditLogRepository {
   }
 
   /**
-   * Retrieves a single audit log by its ID.
+   * Recupera un único registro de auditoría por su ID.
    *
-   * @param {string} id - The unique ID of the audit log to retrieve.
+   * @param {string} id - El ID único del registro de auditoría a recuperar.
    * 
-   * @returns {Promise<any>} The audit log associated with the specified ID.
+   * @returns {Promise<IAudit | null>} El registro de auditoría asociado con el ID especificado o null si no se encuentra.
    */
-  async getAuditLogById(id: string) {
+  async getAuditLogById(id: string): Promise<IAudit | null> {
     return prisma.auditLog.findUnique({
       where: { id },
     });
   }
 
   /**
-   * Updates an existing audit log by its ID.
+   * Actualiza un registro de auditoría existente por su ID.
    *
-   * @param {string} id - The unique ID of the audit log to update.
-   * @param {string} [action] - The new action to set for the audit log.
-   * @param {string} [details] - The new details to set for the audit log.
+   * @param {string} id - El ID único del registro de auditoría a actualizar.
+   * @param {string} [action] - La nueva acción a establecer para el registro de auditoría.
+   * @param {string} [details] - Los nuevos detalles a establecer para el registro de auditoría.
    * 
-   * @returns {Promise<any>} The updated audit log.
+   * @returns {Promise<IAudit>} El registro de auditoría actualizado.
    */
-  async updateAuditLog(id: string, action?: string, details?: string) {
+  async updateAuditLog(id: string, action?: string, details?: string): Promise<IAudit> {
     return prisma.auditLog.update({
       where: { id },
       data: {
@@ -85,13 +86,13 @@ class AuditLogRepository {
   }
 
   /**
-   * Deletes an audit log by its ID.
+   * Elimina un registro de auditoría por su ID.
    *
-   * @param {string} id - The unique ID of the audit log to delete.
+   * @param {string} id - El ID único del registro de auditoría a eliminar.
    * 
-   * @returns {Promise<any>} The result of the deletion operation.
+   * @returns {Promise<IAudit>} El resultado de la operación de eliminación.
    */
-  async deleteAuditLog(id: string) {
+  async deleteAuditLog(id: string): Promise<IAudit> {
     return prisma.auditLog.delete({
       where: { id },
     });
