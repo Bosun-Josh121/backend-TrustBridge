@@ -31,4 +31,26 @@ const checkValidationResult = (req: Request, res: Response, next: NextFunction):
   next();
 };
 
-export { validateRegister, validateVerifyEmail, checkValidationResult };
+// Validates the body of POST /auth/wallet/init
+const validateWalletInit = [
+  body('wallet_address')
+    .isString().withMessage('Wallet address must be a string')
+    .notEmpty().withMessage('Wallet address is required'),
+  body('signed_message')
+    .isString().withMessage('Signed message must be a string')
+    .notEmpty().withMessage('Signed message is required'),
+];
+
+// Validates the body of POST /auth/wallet/verify
+const validateWalletVerify = [
+  body('wallet_address')
+    .isString().withMessage('Wallet address must be a string')
+    .notEmpty().withMessage('Wallet address is required'),
+  //Validate OTP code format (e.g., 6 digits)
+  body('otp_code')
+    .isString().withMessage('OTP code must be a string')
+    .isLength({ min: 6, max: 6 }).withMessage('OTP code must be 6 digits')
+    .isNumeric().withMessage('OTP code must contain only numbers'),
+];
+
+export { validateRegister, validateVerifyEmail, checkValidationResult, validateWalletInit, validateWalletVerify};

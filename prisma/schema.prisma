@@ -145,6 +145,7 @@ enum NotificationType {
   PAYMENT_RECEIVED
   SYSTEM_ALERT
   EMAIL_VERIFICATION
+  OTP_VERIFICATION
 }
 
 model Notification {

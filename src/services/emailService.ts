@@ -26,7 +26,7 @@ interface EmailTemplate {
   subject: string;
   template: (userName: string, message: string) => string;
 }
-
+const OTP_EXPIRY_MINUTES = 5;
 export class EmailNotificationService {
   private transporter: Transporter;
   private emailTemplates: Record<NotificationType, EmailTemplate>;
@@ -158,6 +158,24 @@ export class EmailNotificationService {
               <p>Thank you,<br>TrustBridge</p>
             </body>
           </html>
+        `,
+      },
+
+      [NotificationType.OTP_VERIFICATION]: {
+        subject: 'Your Two-Factor Authentication Code',
+        // Template expects userName and the plain OTP code as the 'message'
+        template: (userName, otpCode) => `
+          <html><body>
+            <h1>Authentication Code</h1>
+            <p>Hello ${userName || 'User'},</p>
+            <p>Your verification code for wallet authentication is:</p>
+            <h2 style="font-size: 24px; text-align: center; letter-spacing: 3px; margin: 20px 0;">
+              ${otpCode} 
+            </h2>
+            <p>This code will expire in ${OTP_EXPIRY_MINUTES} minutes.</p>
+            <p>If you did not request this code, please ignore this email.</p>
+            <p>Thank you,<br>TrustBridge</p> {/* Adjust App Name */}
+          </body></html>
         `,
       },
     };

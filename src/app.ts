@@ -14,6 +14,7 @@ import cookieParser from "cookie-parser";
 import { scheduleTokenCleanup } from './services/tokenCleanup';
 import errorHandler from './middleware/errorHandler'; // Import the error handler
 import database from './config/db';
+import walletAuthRoutes from './routes/walletAuthRoutes';
 
 dotenv.config();
 const app = express();
@@ -56,6 +57,7 @@ app.get("/health", async (req, res) => {
 
 // Public routes
 app.use("/api/auth", authRoutes);
+app.use("/api/auth/wallet", walletAuthRoutes);
 
 // Protected routes
 app.use("/api/loans", isAuthenticated, loanRoutes);
